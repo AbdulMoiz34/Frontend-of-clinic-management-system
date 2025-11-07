@@ -1,10 +1,10 @@
 import React from "react";
 import { useForm, Controller } from "react-hook-form";
 import { Button, Input, message } from "antd";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 
-const Signup = () => {
+const Login = () => {
     const {
         control,
         handleSubmit,
@@ -12,47 +12,40 @@ const Signup = () => {
         reset,
     } = useForm();
 
+    const navigate = useNavigate();
     const onSubmit = async (data) => {
         try {
-            const res = await axios.post("http://localhost:3000/api/auth/register", data, {
+            const res = await axios.post("http://localhost:3000/api/auth/login", data, {
                 withCredentials: true
             });
-            console.log(res);
-            message.success("Account created successfully!");
-            reset();
+
+            message.success("Login successful!");
+
+            if (res.data.user.role === "admin") {
+                navigate("/admin/dashboard");
+            } else if (res.data.user.role === "doctor") {
+                navigate("/doctor/patients");
+            } else {
+                navigate("/");
+            }
+
         } catch (error) {
             console.log(error)
-            message.error(error.response.data?.message || error.message || "Something went wrong!");
+            message.error(error.response?.data?.message || "Invalid email or password!");
         }
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center px-3">
+        <div className="min-h-[80vh] flex items-center justify-center px-3">
             <div className="bg-white w-full max-w-md p-8 rounded-2xl shadow-lg border border-gray-100">
-                <h2 className="text-2xl font-bold text-gray-800">Create an Account</h2>
-                <p className="text-gray-500 text-sm mb-6">Sign up to book appointments</p>
+                {/* ---------- Header ---------- */}
+                <h2 className="text-2xl font-bold text-gray-800 mb-4">Login</h2>
+                {/* <p className="text-gray-500 text-sm mb-6">
+                    Please log in to book appointment
+                </p> */}
 
+                {/* ---------- Form ---------- */}
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-
-                    {/* Full Name */}
-                    <div>
-                        <label className="text-sm font-medium text-gray-700">Full Name</label>
-                        <Controller
-                            name="fullName"
-                            control={control}
-                            rules={{ required: "Full name is required" }}
-                            render={({ field }) => (
-                                <Input
-                                    {...field}
-                                    placeholder="John Doe"
-                                    size="large"
-                                    className={`${errors.fullName ? "border-red-500" : ""}`}
-                                />
-                            )}
-                        />
-                        {errors.fullName && <p className="text-xs text-red-500 mt-1">{errors.fullName.message}</p>}
-                    </div>
-
                     {/* Email */}
                     <div>
                         <label className="text-sm font-medium text-gray-700">Email</label>
@@ -75,22 +68,22 @@ const Signup = () => {
                                 />
                             )}
                         />
-                        {errors.email && <p className="text-xs text-red-500 mt-1">{errors.email.message}</p>}
+                        {errors.email && (
+                            <p className="text-xs text-red-500 mt-1">
+                                {errors.email.message}
+                            </p>
+                        )}
                     </div>
 
                     {/* Password */}
                     <div>
-                        <label className="text-sm font-medium text-gray-700">Password</label>
+                        <label className="text-sm font-medium text-gray-700">
+                            Password
+                        </label>
                         <Controller
                             name="password"
                             control={control}
-                            rules={{
-                                required: "Password is required",
-                                minLength: {
-                                    value: 6,
-                                    message: "Password must be at least 6 characters",
-                                },
-                            }}
+                            rules={{ required: "Password is required" }}
                             render={({ field }) => (
                                 <Input.Password
                                     {...field}
@@ -100,9 +93,14 @@ const Signup = () => {
                                 />
                             )}
                         />
-                        {errors.password && <p className="text-xs text-red-500 mt-1">{errors.password.message}</p>}
+                        {errors.password && (
+                            <p className="text-xs text-red-500 mt-1">
+                                {errors.password.message}
+                            </p>
+                        )}
                     </div>
 
+                    {/* ---------- Submit Button ---------- */}
                     <Button
                         htmlType="submit"
                         type="primary"
@@ -110,14 +108,18 @@ const Signup = () => {
                         size="large"
                         className="w-full bg-[#567DFD]! hover:bg-[#4769e6]! rounded-lg font-medium shadow-sm"
                     >
-                        Create Account
+                        Login
                     </Button>
                 </form>
 
+                {/* ---------- Footer Text ---------- */}
                 <p className="text-center mt-5 text-sm text-gray-600">
-                    Already have an account?
-                    <Link to="/login" className="text-[#567DFD] font-medium hover:underline">
-                        &nbsp; Login
+                    Create a new account?
+                    <Link
+                        to="/signup"
+                        className="text-[#567DFD] font-medium hover:underline"
+                    >
+                        &nbsp;Click here
                     </Link>
                 </p>
             </div>
@@ -125,4 +127,4 @@ const Signup = () => {
     );
 };
 
-export default Signup;
+export default Login;
