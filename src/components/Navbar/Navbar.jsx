@@ -1,14 +1,14 @@
-import { useContext, useState } from "react";
+import { useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import ClinicLogo from "../Logo/Logo";
 import { FiMenu, FiX } from "react-icons/fi";
-import AuthContext from "../../context/AuthContext";
 import UserMenu from "./UserMenu";
+import { useSelector } from "react-redux";
 
 const Navbar = () => {
     const [isOpen, setIsOpen] = useState(false);
 
-    const user = useContext(AuthContext);
+    const user = useSelector(state => state.auth.user);
 
     const navLinks = [
         { name: 'HOME', to: '/' },
@@ -74,9 +74,11 @@ const Navbar = () => {
                             </NavLink>
                         ))}
 
-                        <button className="text-sm! w-full mt-2 cursor-pointer px-6 py-2 rounded-full text-white bg-indigo-500 hover:bg-indigo-600 transition duration-150 ease-in-out shadow-lg">
-                            Create account
-                        </button>
+                        <Link to="/signup">
+                            <button className="text-sm! w-full mt-2 cursor-pointer px-6 py-2 rounded-full text-white bg-indigo-500 hover:bg-indigo-600 transition duration-150 ease-in-out shadow-lg">
+                                Create account
+                            </button>
+                        </Link>
                     </div>
                 )}
             </div>

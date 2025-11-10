@@ -4,7 +4,7 @@ import { FaEnvelope, FaPhone, FaLock, FaMapMarkerAlt, FaGraduationCap, FaBriefca
 import { MdOutlineDescription, MdSchedule, MdRoom } from 'react-icons/md';
 import { Upload, message } from 'antd';
 import { InboxOutlined } from '@ant-design/icons';
-import { uploadFileOnCloudinary } from "../../helpers";
+import { convertToMinutes, uploadFileOnCloudinary } from "../../helpers";
 import axios from 'axios';
 
 const { Dragger } = Upload;
@@ -77,32 +77,27 @@ const AddDoctor = () => {
         if (selectedDays.length === 0) return message.error("Please select at least one working day");
 
         if (!startTime || !endTime) return message.error("Please select start and end time");
-
-        if (startTime >= endTime) return message.error("End time must be after start time");
-
         if (!selectedRoom) return message.error("Please select a consultation room");
 
         setLoading(true);
 
+        const availability = {
+            days: selectedDays,
+            startTime,
+            endTime,
+            roomNo: +selectedRoom,
+            startMinutes: convertToMinutes(startTime),
+            endMinutes: convertToMinutes(endTime)
+        };
+
         try {
-            // Prepare availability data for backend
-            const availability = [{
-                days: selectedDays,
-                startTime: startTime,
-                endTime: endTime
-            }];
 
-
-            // Here you would:
-            // 1. Upload image to Cloudinary
             const imgUrl = await uploadFileOnCloudinary(imageFile);
             console.log(imgUrl);
-            // 2. Send data to backend
             await axios.post("http://localhost:3000/api/admin/add-doctor", {
                 imgUrl,
                 ...data,
                 availability,
-                room: selectedRoom,
                 status: "available"
             }, {
                 withCredentials: true
@@ -111,15 +106,16 @@ const AddDoctor = () => {
             message.success('Doctor added successfully!');
 
             // Reset form
-            // reset();
-            // setImageFile(null);
-            // setPreviewImage(null);
-            // setSelectedDays([]);
-            // setStartTime('');
-            // setEndTime('');
-            // setSelectedRoom('');
+            reset();
+            setImageFile(null);
+            setPreviewImage(null);
+            setSelectedDays([]);
+            setStartTime('');
+            setEndTime('');
+            setSelectedRoom('');
         } catch (error) {
-            message.error( error.response.data?.message || 'Failed to add doctor');
+            console.log(error)
+            message.error(error.response?.data?.message || 'Failed to add doctor');
         } finally {
             setLoading(false);
         }
@@ -237,7 +233,7 @@ const AddDoctor = () => {
                                         {...register('phone', {
                                             required: 'Phone number is required',
                                             pattern: {
-                                                value: /^[0-9]{10,15}$/,
+                                                value: /^[0-9]{11}$/,
                                                 message: 'Invalid phone number'
                                             }
                                         })}
@@ -321,7 +317,7 @@ const AddDoctor = () => {
                                 <div className="relative">
                                     <MdOutlineDescription className="absolute left-4 top-4 text-slate-400" />
                                     <textarea
-                                        {...register('bio')}
+                                        {...register('about')}
                                         className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all resize-none"
                                         rows="3"
                                         placeholder="Brief description about the doctor..."
@@ -409,9 +405,9 @@ const AddDoctor = () => {
                                             onChange={(e) => setSelectedRoom(e.target.value)}
                                             className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none transition-all"
                                         >
-                                            <option value="">Select Room</option>
+                                            <option>Select Room</option>
                                             {rooms.map((room, idx) => (
-                                                <option key={idx} value={room}>{room}</option>
+                                                <option key={idx} value={idx + 1}>{room}</option>
                                             ))}
                                         </select>
                                     </div>
@@ -429,6 +425,7 @@ const AddDoctor = () => {
                                         <span>•</span>
                                         <span>{startTime} - {endTime}</span>
                                         <span>•</span>
+                                        <span>Room No:</span>
                                         <span className="font-medium">{selectedRoom}</span>
                                     </div>
                                 </div>

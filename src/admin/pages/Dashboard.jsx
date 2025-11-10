@@ -1,12 +1,29 @@
+import { useQuery } from '@tanstack/react-query';
 import { FaUserDoctor, FaCalendarCheck, FaUsers, FaClock } from 'react-icons/fa6';
 import { HiTrendingUp, HiTrendingDown } from 'react-icons/hi';
+import { Link } from 'react-router-dom';
+import { getDashboardSlats } from "../../api/dashboardApi";
+import { Spin } from 'antd';
 
 const Dashboard = () => {
-  // Mock data
+
+  const { data, isLoading } = useQuery({
+    queryKey: ["adminDashboard"],
+    queryFn: getDashboardSlats,
+    refetchOnWindowFocus: false,
+    retry: false
+  });
+
+  if (isLoading) {
+    return <div className='w-full h-full flex justify-center items-center'>
+      <Spin size='small' />
+    </div>
+  }
+
   const stats = [
     {
       title: "Total Doctors",
-      value: "24",
+      value: data.totalDoctors,
       change: "+2",
       trend: "up",
       icon: <FaUserDoctor />,
@@ -17,7 +34,7 @@ const Dashboard = () => {
     },
     {
       title: "Total Appointments",
-      value: "156",
+      value: data.totalAppointments,
       change: "+12",
       trend: "up",
       icon: <FaCalendarCheck />,
@@ -28,7 +45,7 @@ const Dashboard = () => {
     },
     {
       title: "Total Patients",
-      value: "892",
+      value: data.totalPatients,
       change: "+48",
       trend: "up",
       icon: <FaUsers />,
@@ -36,17 +53,6 @@ const Dashboard = () => {
       bgColor: "bg-purple-50",
       iconBg: "bg-purple-500",
       textColor: "text-purple-600"
-    },
-    {
-      title: "Pending Today",
-      value: "18",
-      change: "-3",
-      trend: "down",
-      icon: <FaClock />,
-      color: "orange",
-      bgColor: "bg-orange-50",
-      iconBg: "bg-orange-500",
-      textColor: "text-orange-600"
     }
   ];
 
@@ -107,7 +113,7 @@ const Dashboard = () => {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
         {stats.map((stat, index) => (
           <div key={index} className={`${stat.bgColor} rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow duration-200`}>
             <div className="flex items-center justify-between mb-4">
@@ -127,13 +133,16 @@ const Dashboard = () => {
 
       <div className="grid grid-cols-1  gap-6">
         {/* Latest Appointments */}
+
         <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold text-slate-800">Latest Appointments</h2>
-            <button className="text-blue-600 text-sm font-medium hover:text-blue-700 transition-colors">
-              View All →
-            </button>
-          </div>
+          <Link to="/admin/appointments">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold text-slate-800">Latest Appointments</h2>
+              <button className="text-blue-600 text-sm font-medium hover:text-blue-700 transition-colors">
+                View All →
+              </button>
+            </div>
+          </Link>
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
@@ -175,16 +184,20 @@ const Dashboard = () => {
 
       {/* Quick Actions */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
-        <div className="bg-linear-to-br from-blue-500 to-blue-600 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transition-shadow cursor-pointer">
-          <div className="text-3xl mb-3">📅</div>
-          <h3 className="text-lg font-bold mb-2">Schedule Appointment</h3>
-          <p className="text-blue-100 text-sm">Book new appointments for patients</p>
-        </div>
-        <div className="bg-linear-to-br from-green-500 to-green-600 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transition-shadow cursor-pointer">
-          <div className="text-3xl mb-3">👨‍⚕️</div>
-          <h3 className="text-lg font-bold mb-2">Add Doctor</h3>
-          <p className="text-green-100 text-sm">Register new doctors to the system</p>
-        </div>
+        <Link to="/admin/appointments">
+          <div className="bg-linear-to-br from-blue-500 to-blue-600 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transition-shadow cursor-pointer">
+            <div className="text-3xl mb-3">📅</div>
+            <h3 className="text-lg font-bold mb-2">Appointments</h3>
+            <p className="text-blue-100 text-sm">View All the Appointments</p>
+          </div>
+        </Link>
+        <Link to="/admin/add-doctor">
+          <div className="bg-linear-to-br from-green-500 to-green-600 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transition-shadow cursor-pointer">
+            <div className="text-3xl mb-3">👨‍⚕️</div>
+            <h3 className="text-lg font-bold mb-2">Add Doctor</h3>
+            <p className="text-green-100 text-sm">Register new doctors to the system</p>
+          </div>
+        </Link>
         <div className="bg-linear-to-br from-purple-500 to-purple-600 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transition-shadow cursor-pointer">
           <div className="text-3xl mb-3">👥</div>
           <h3 className="text-lg font-bold mb-2">Manage Patients</h3>

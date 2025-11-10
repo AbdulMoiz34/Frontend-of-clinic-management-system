@@ -1,44 +1,32 @@
 import { useState } from "react";
-import {DoctorCard} from "../../components";
+import { DoctorCard } from "../../components";
+import { useQuery } from "@tanstack/react-query";
+import axios from "axios";
+import { Spin } from "antd";
+
+const getDoctors = async () => {
+    const res = await axios.get("/doctors");
+    return res.data;
+}
 
 const Doctors = () => {
     const [searchQuery, setSearchQuery] = useState("");
 
-    const doctors = [
-        {
-            id: 1,
-            name: "Dr. Richard James",
-            specialty: "General physician",
-            image: "https://raw.githubusercontent.com/avinashdm/gs-images/main/prescripto/doc1.png",
-            isAvailable: true,
-        },
-        {
-            id: 2,
-            name: "Dr. Sarah Malik",
-            specialty: "Cardiologist",
-            image: "https://cdn-icons-png.flaticon.com/512/387/387561.png",
-            isAvailable: false,
-        },
-        {
-            id: 3,
-            name: "Dr. Ahmed Khan",
-            specialty: "Dermatologist",
-            image: "https://cdn-icons-png.flaticon.com/512/387/387561.png",
-            isAvailable: true,
-        },
-        {
-            id: 4,
-            name: "Dr. Emma Wilson",
-            specialty: "Neurologist",
-            image: "https://cdn-icons-png.flaticon.com/512/387/387561.png",
-            isAvailable: true,
-        },
-    ];
+    const { data: doctors, isLoading } = useQuery({
+        queryKey: ["doctors"],
+        queryFn: getDoctors
+    });
+
+    if (isLoading) return <div className="min-h-[80vh] flex justify-center items-center">
+        <Spin size="small" />
+    </div>;
 
     const filteredDoctors = doctors.filter((doctor) => {
+        const { fullName } = doctor.user;
+
         return (
-            doctor.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            doctor.specialty.toLowerCase().includes(searchQuery.toLowerCase())
+            fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            doctor.specialization.toLowerCase().includes(searchQuery.toLowerCase())
         );
     });
 

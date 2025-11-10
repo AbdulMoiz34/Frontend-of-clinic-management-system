@@ -1,7 +1,7 @@
-import { useCurrentUser } from "../../hooks/useCurrentUser";
+import { useSelector } from "react-redux";
 
 const PatientProfile = () => {
-    const { data: user, isLoading } = useCurrentUser();
+    const { user, loading: isLoading } = useSelector(state => state.auth);
 
     if (isLoading) return <p>Loading...</p>;
 

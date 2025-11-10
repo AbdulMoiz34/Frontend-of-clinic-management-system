@@ -7,8 +7,8 @@ const DoctorCard = ({ doctor }) => {
             {/* Image */}
             <div className="w-full flex justify-center">
                 <img
-                    src={doctor.image}
-                    alt={doctor.name}
+                    src={doctor.imgUrl}
+                    alt={doctor._id}
                     className="w-32 h-32 object-cover rounded-full border-4 border-gray-100 shadow-sm"
                 />
             </div>
@@ -25,20 +25,20 @@ const DoctorCard = ({ doctor }) => {
                         className={`text-sm font-medium ${doctor.isAvailable ? "text-green-600" : "text-gray-500"
                             }`}
                     >
-                        {doctor.isAvailable ? "Available" : "Unavailable"}
+                        {doctor.status}
                     </span>
                 </div>
 
                 {/* Name */}
-                <h3 className="text-lg font-semibold text-gray-800">{doctor.name}</h3>
+                <h3 className="text-lg font-semibold text-gray-800">{doctor.user.fullName}</h3>
 
                 {/* Specialty */}
-                <p className="text-sm text-gray-500">{doctor.specialty}</p>
+                <p className="text-sm text-gray-500">{doctor.specialization}</p>
             </div>
 
             {/* Button */}
             <div className="mt-6 flex justify-center">
-                <Link to={`${doctor.id}`} className="cursor-pointer px-6 py-2 text-sm rounded-full text-white bg-indigo-500 hover:bg-indigo-600 transition duration-150 ease-in-out shadow-lg">
+                <Link to={`${doctor._id}`} className="cursor-pointer px-6 py-2 text-sm rounded-full text-white bg-indigo-500 hover:bg-indigo-600 transition duration-150 ease-in-out shadow-lg">
                     Book Appointment
                 </Link>
             </div>

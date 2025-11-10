@@ -1,4 +1,4 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { FiLogOut } from "react-icons/fi";
 import { FaRegCalendarCheck } from "react-icons/fa";
 import { MdOutlineDashboard } from "react-icons/md";
@@ -8,16 +8,24 @@ import { AiOutlineUser } from "react-icons/ai";
 import { useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { message } from "antd";
+import { useDispatch } from "react-redux";
+import { clearUser } from "../../../store/authReducer";
 
 const AdminSidebar = () => {
     const queryClient = useQueryClient();
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
 
     const handleLogout = async () => {
         try {
-            await axios.post("http://localhost:3000/api/auth/logout", {}, { withCredentials: true });
-            queryClient.invalidateQueries(["user"]);
+            await axios.post("/auth/logout");
+
+            dispatch(clearUser());
+            queryClient.removeQueries(["user"]);
+
             message.success("Logged out!");
-        } catch {
+            navigate("/login");
+        } catch (err) {
             message.error("Logout failed!");
         }
     };

@@ -1,28 +1,33 @@
-import { useState, useRef, useEffect, useContext } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import { message } from "antd";
 import { useQueryClient } from "@tanstack/react-query";
-import AuthContext from "../../context/AuthContext";
+import { useDispatch, useSelector } from "react-redux";
+import { clearUser } from "../../store/authReducer";
 
 const UserMenu = () => {
     const [open, setOpen] = useState(false);
     const menuRef = useRef(null);
     const queryClient = useQueryClient();
-    const user = useContext(AuthContext);
+    const dispatch = useDispatch();
+
+    const user = useSelector(state => state.auth.user);
 
     const handleLogout = async () => {
         try {
-            await axios.post("http://localhost:3000/api/auth/logout", {}, { withCredentials: true });
-            queryClient.invalidateQueries(["user"]);
+            await axios.post("/auth/logout");
+
+            dispatch(clearUser());
+            queryClient.removeQueries(["user"]);
+
             message.success("Logged out!");
             setOpen(false);
-        } catch {
+        } catch (err) {
             message.error("Logout failed!");
         }
     };
 
-    // Close menu if user clicks outside
     useEffect(() => {
         const handler = (e) => {
             if (menuRef.current && !menuRef.current.contains(e.target)) {
@@ -42,7 +47,7 @@ const UserMenu = () => {
                 className="flex items-center bg-white hover:bg-gray-100 transition p-1 rounded-full shadow-sm"
             >
                 <img
-                    src={user.avatar || "https://images.icon-icons.com/1378/PNG/512/avatardefault_92824.png"}
+                    src={user.imgUrl || "https://images.icon-icons.com/1378/PNG/512/avatardefault_92824.png"}
                     alt="avatar"
                     className="w-8 h-8 rounded-full object-cover"
                 />

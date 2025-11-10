@@ -3,12 +3,15 @@ import { MainLayout, AdminLayout } from "../../layout";
 import { LoginPage, SignupPage, Contact, About, NotFound, Doctors, DoctorDetails, MyAppointments, PatientProfile, Home } from "../../pages";
 import { Dashboard as AdminDashboard, AddDoctor, Appointments, Doctors as AdminDoctors, Patients } from "../../admin/pages";
 import { DoctorDashboard, MyAppointment as DoctorAppointments, Profile as DoctorProfile } from "../../doctor/pages";
-import { useContext } from "react";
 import { ProtectedRoute } from "../../components";
-import AuthContext from "../../context/AuthContext";
+import { useSelector } from "react-redux";
+import { Spin } from "antd";
+
 const AppRouter = () => {
-    const user = useContext(AuthContext);
-    console.log(user);
+    const { user, loading } = useSelector(state => state.auth);
+
+    if (loading) return <Spin size="small" />;
+
     return (
         <Routes>
             {/* Public Routes */}
