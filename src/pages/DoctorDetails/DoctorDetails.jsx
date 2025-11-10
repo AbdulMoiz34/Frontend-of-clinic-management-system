@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import { format, addMonths } from "date-fns";
+import { useSelector } from "react-redux";
 
 const generateTimeSlots = (startTime, endTime, interval = 30) => {
     const slots = [];
@@ -42,18 +43,9 @@ const getDoctorDetails = async (id) => {
     }
 }
 
-// const today = new Date();
-// const minDate = today.toISOString().split("T")[0];
-
-// const nextMonth = today.getMonth() + 1;
-// today.setMonth(nextMonth)
-// const maxDate = today.toISOString().split("T")[0];
-
 const today = new Date();
 const minDate = format(today, "yyyy-MM-dd");
 const maxDate = format(addMonths(today, 1), "yyyy-MM-dd");
-console.log(minDate);
-console.log(maxDate);
 
 const DoctorDetails = () => {
     const [selectedDate, setSelectedDate] = useState('');
@@ -61,6 +53,8 @@ const DoctorDetails = () => {
     const [bookingLoading, setBookingLoading] = useState(false);
 
     const { docId } = useParams();
+    const user = useSelector(state => state.auth.user);
+    console.log(user);
 
     const { data: doctor, isLoading } = useQuery({
         queryKey: ["doctorDetails",],
@@ -83,23 +77,38 @@ const DoctorDetails = () => {
         : [];
 
     const handleBookAppointment = async () => {
+        if (!user || user?.role !== "patient") return message.error("Please Login First");
+
         if (!selectedDate || !selectedTime) {
-            message.error('Please select both date and time');
+            message.error("Please select both date and time");
             return;
         }
 
         setBookingLoading(true);
 
-        setTimeout(() => {
-            message.success('Appointment booked successfully!');
-            console.log({
-                doctorId: doctor._id,
+        try {
+            const res = await axios.post("/patient/create-appointment", {
+                docId: doctor._id,
+                patientId: user._id,
                 date: selectedDate,
-                time: selectedTime
+                time: selectedTime,
+                patientDisease: "",
+                status: "Booked"
             });
+            console.log(res);
+
+            message.success("Appointment booked successfully!");
+            setSelectedTime(null);
+            setSelectedDate(null);
+
+        } catch (err) {
+            console.log(err);
+            message.error(err?.response?.data?.message || "Failed to book appointment");
+        } finally {
             setBookingLoading(false);
-        }, 1500);
+        }
     };
+
 
     return (
         <div className="max-w-6xl mx-auto px-4 py-10">
